@@ -28,6 +28,7 @@ class ImageProcessor(QWidget):
         self.btn_process = QPushButton('프로그램 실행', self)
         self.btn_brightness = QPushButton('밝기 조절', self)
         self.btn_contrast = QPushButton('대비 조절', self)
+        self.btn_edge = QPushButton('에지 강조', self)
         self.btn_morphology = QPushButton('모폴로지', self)
         self.btn_binarization = QPushButton('이진화', self)
         self.btn_save = QPushButton('이미지 파일 저장', self)
@@ -39,6 +40,7 @@ class ImageProcessor(QWidget):
         self.btn_contrast.clicked.connect(self.slider_contrast_changed)
         self.btn_morphology.clicked.connect(self.slider_morphology_changed)
         self.btn_binarization.clicked.connect(self.slider_binarization_changed)
+        self.btn_edge.clicked.connect(self.slider_edge_changed)
         
         # '완료' 버튼 초기화
         self.btn_complete = QPushButton('완료', self)
@@ -72,6 +74,7 @@ class ImageProcessor(QWidget):
         vbox.addWidget(self.btn_process)
         vbox.addWidget(self.btn_brightness)
         vbox.addWidget(self.btn_contrast)
+        vbox.addWidget(self.btn_edge)
         vbox.addWidget(self.btn_binarization)
         vbox.addWidget(self.btn_morphology)
         vbox.addWidget(self.slider)
@@ -157,6 +160,8 @@ class ImageProcessor(QWidget):
             self.btn_morphology.clicked.disconnect(self.slider_morphology_changed)
         elif button_text == '이진화':
             self.btn_binarization.clicked.disconnect(self.slider_binarization_changed)
+        elif button_text == '에지 강조':
+            self.btn_edge.clicked.disconnect(self.slider_edge_changed)
             
             
 ########################## 트랙바 조절 #######################################
@@ -169,6 +174,7 @@ class ImageProcessor(QWidget):
     
         # 나머지 버튼은 비활성화
         self.btn_contrast.setEnabled(False)
+        self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
         self.btn_binarization.setEnabled(False)  
         
@@ -188,6 +194,7 @@ class ImageProcessor(QWidget):
         
         # 나머지 버튼은 비활성화
         self.btn_brightness.setEnabled(False)
+        self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
         self.btn_binarization.setEnabled(False)  
         
@@ -200,12 +207,34 @@ class ImageProcessor(QWidget):
         
         self.mode = 2
         self.display_image()
+    
+    def slider_edge_changed(self):
+        self.btn_clicked()
+        print('에지 강조 조정을 시작합니다.')
+        
+        # 나머지 버튼은 비활성화
+        self.btn_brightness.setEnabled(False)
+        self.btn_contrast.setEnabled(False)
+        self.btn_morphology.setEnabled(False)
+        self.btn_binarization.setEnabled(False)  
+        
+        self.previous_image = self.processed_image
+        
+        self.slider.setValue(0) 
+        self.slider.setMinimum(100)
+        self.slider.setMaximum(225)
+        self.slider.setSingleStep(1) 
+        
+        self.mode = 5
+        self.display_image()
+    
         
     def slider_morphology_changed(self):
         self.btn_clicked()
         print('모폴로지 조정을 시작합니다.')
         # 나머지 버튼은 비활성화
         self.btn_contrast.setEnabled(False)
+        self.btn_edge.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_binarization.setEnabled(False)  
         
@@ -224,6 +253,7 @@ class ImageProcessor(QWidget):
         print('이진화 조정을 시작합니다.')
         # 나머지 버튼은 비활성화
         self.btn_contrast.setEnabled(False)
+        self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
         self.btn_brightness.setEnabled(False)  
         
@@ -252,7 +282,9 @@ class ImageProcessor(QWidget):
             self.processed_image = self.apply_morphology(self.previous_image)
         elif self.mode == 4:
             self.processed_image = self.apply_binarization(self.previous_image)
-        
+        elif self.mode == 5:
+            self.processed_image = self.apply_edge(self.previous_image)
+            
         # QLabel에 트랙바 값 표시
         self.label_slider_value.setText(str(self.slider.value()))
         self.display_image()
@@ -294,6 +326,21 @@ class ImageProcessor(QWidget):
         return binarized_image
 
 
+    def apply_edge(self, image):
+        factor = self.slider.value()
+        print('현재 에지 강조 조정중', factor) # 100~255까지 1씩 증가
+        #에지 강조 로직
+        edges = cv2.Canny(image, factor, 225)
+        # 에지의 윤곽을 찾음
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # 에지 안쪽을 색칠하기 위한 빈 이미지 생성
+        filled_image = np.zeros_like(image)
+        # 에지 윤곽을 그림
+        cv2.drawContours(filled_image, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
+        # 색칠된 이미지와 원본 이미지를 합침
+        result_image = cv2.addWeighted(image, 1, filled_image, 0.5, 0)
+        
+        return result_image
 
 
     ############################# 저장 및 종료 ########################################
@@ -315,6 +362,7 @@ class ImageProcessor(QWidget):
         # 버튼 활성화
         self.btn_brightness.setEnabled(True)
         self.btn_contrast.setEnabled(True)
+        self.btn_edge.setEnabled(True)
         self.btn_morphology.setEnabled(True)
         self.btn_binarization.setEnabled(True)
         self.btn_save.setEnabled(True)
@@ -325,6 +373,7 @@ class ImageProcessor(QWidget):
         # 버튼 비활성화
         self.btn_brightness.setEnabled(False)
         self.btn_contrast.setEnabled(False)
+        self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
         self.btn_binarization.setEnabled(False)
         self.btn_save.setEnabled(False)
