@@ -26,6 +26,7 @@ class ImageProcessor(QWidget):
         # 버튼 초기화
         self.btn_load = QPushButton('이미지 등록', self)
         self.btn_process = QPushButton('프로그램 실행', self)
+        self.btn_invert = QPushButton('색 반전', self)
         self.btn_brightness = QPushButton('밝기 조절', self)
         self.btn_contrast = QPushButton('대비 조절', self)
         self.btn_edge = QPushButton('에지 강조', self)
@@ -60,6 +61,7 @@ class ImageProcessor(QWidget):
         self.disable_buttons()
 
         # 버튼에 함수 연결
+        self.btn_invert.clicked.connect(self.invert_image)
         self.btn_load.clicked.connect(self.load_image)
         self.btn_process.clicked.connect(self.process_image)
         self.btn_save.clicked.connect(self.save_image)
@@ -72,6 +74,7 @@ class ImageProcessor(QWidget):
         vbox.addWidget(self.image_label)
         vbox.addWidget(self.btn_load)
         vbox.addWidget(self.btn_process)
+        vbox.addWidget(self.btn_invert)
         vbox.addWidget(self.btn_brightness)
         vbox.addWidget(self.btn_contrast)
         vbox.addWidget(self.btn_edge)
@@ -163,8 +166,18 @@ class ImageProcessor(QWidget):
         elif button_text == '에지 강조':
             self.btn_edge.clicked.disconnect(self.slider_edge_changed)
             
-            
-########################## 트랙바 조절 #######################################
+########################## 색상 반전 버튼 #################
+
+
+    def invert_image(self):
+        print('색상을 반전합니다.')
+        
+        result = 255 - self.processed_image
+        self.processed_image = result
+        
+        self.display_image()
+        
+########################## 전처리 버튼 트랙바 조절 #######################################
 
 
 
@@ -173,6 +186,7 @@ class ImageProcessor(QWidget):
         print('밝기 조정을 시작합니다.')
     
         # 나머지 버튼은 비활성화
+        self.btn_invert.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -193,6 +207,7 @@ class ImageProcessor(QWidget):
         print('대비 조정을 시작합니다.')
         
         # 나머지 버튼은 비활성화
+        self.btn_invert.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -213,6 +228,7 @@ class ImageProcessor(QWidget):
         print('에지 강조 조정을 시작합니다.')
         
         # 나머지 버튼은 비활성화
+        self.btn_invert.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -233,6 +249,7 @@ class ImageProcessor(QWidget):
         self.btn_clicked()
         print('모폴로지 조정을 시작합니다.')
         # 나머지 버튼은 비활성화
+        self.btn_invert.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_brightness.setEnabled(False)
@@ -252,6 +269,7 @@ class ImageProcessor(QWidget):
         self.btn_clicked()
         print('이진화 조정을 시작합니다.')
         # 나머지 버튼은 비활성화
+        self.btn_invert.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -268,7 +286,7 @@ class ImageProcessor(QWidget):
         self.display_image()
         
         
-        
+    ################### 전처리 함수 호출 ###################33333
     
     def slider_value_changed(self): 
         self.display_image()
@@ -291,7 +309,7 @@ class ImageProcessor(QWidget):
         
         
         
-    ############################ 전처리 버튼 ###############################################
+    ############################ 전처리 함수 ###############################################
     
     
     def adjust_brightness(self, image):
@@ -360,6 +378,7 @@ class ImageProcessor(QWidget):
 
     def enable_buttons(self):
         # 버튼 활성화
+        self.btn_invert.setEnabled(True)
         self.btn_brightness.setEnabled(True)
         self.btn_contrast.setEnabled(True)
         self.btn_edge.setEnabled(True)
@@ -371,6 +390,7 @@ class ImageProcessor(QWidget):
 
     def disable_buttons(self):
         # 버튼 비활성화
+        self.btn_invert.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
