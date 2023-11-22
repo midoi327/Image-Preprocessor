@@ -27,6 +27,7 @@ class ImageProcessor(QWidget):
         self.btn_load = QPushButton('이미지 등록', self)
         self.btn_process = QPushButton('프로그램 실행', self)
         self.btn_invert = QPushButton('색 반전', self)
+        self.btn_gray = QPushButton('그레이스케일화', self)
         self.btn_brightness = QPushButton('밝기 조절', self)
         self.btn_contrast = QPushButton('대비 조절', self)
         self.btn_edge = QPushButton('에지 강조', self)
@@ -62,6 +63,7 @@ class ImageProcessor(QWidget):
 
         # 버튼에 함수 연결
         self.btn_invert.clicked.connect(self.invert_image)
+        self.btn_gray.clicked.connect(self.grayscale_image)
         self.btn_load.clicked.connect(self.load_image)
         self.btn_process.clicked.connect(self.process_image)
         self.btn_save.clicked.connect(self.save_image)
@@ -75,6 +77,7 @@ class ImageProcessor(QWidget):
         vbox.addWidget(self.btn_load)
         vbox.addWidget(self.btn_process)
         vbox.addWidget(self.btn_invert)
+        vbox.addWidget(self.btn_gray)
         vbox.addWidget(self.btn_brightness)
         vbox.addWidget(self.btn_contrast)
         vbox.addWidget(self.btn_edge)
@@ -111,14 +114,27 @@ class ImageProcessor(QWidget):
         if self.processed_image is not None:
             # 이미지 크기를 512x512로 리사이즈
             displayed_image = cv2.resize(self.processed_image, (512, 512))
-            
-            # 이미지를 그레이스케일로 변환
-            displayed_image_gray = cv2.cvtColor(displayed_image, cv2.COLOR_BGR2GRAY)
-            
-            bytes_per_line = 1 * displayed_image_gray.shape[1]  # gray 채널이므로 1채널
 
-            q_image = QImage(displayed_image_gray.data, displayed_image_gray.shape[1], displayed_image_gray.shape[0], bytes_per_line, QImage.Format_Grayscale8)
-            pixmap = QPixmap.fromImage(q_image)
+            if len(displayed_image.shape) == 3 and displayed_image.shape[2] == 3:
+                # 이미지가 3채널 (RGB)인 경우 BGR에서 RGB로 변환
+                # displayed_image_rgb = cv2.cvtColor(displayed_image, cv2.COLOR_RGB2BGR)
+                displayed_image_rgb = displayed_image
+                
+                height, width, channel = displayed_image_rgb.shape
+                bytes_per_line = 3 * width  # 3채널(RGB)이므로 3을 곱합니다.
+
+                q_image = QImage(displayed_image_rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                pixmap = QPixmap.fromImage(q_image)
+                
+                
+            else:
+                # 이미지가 1채널인 경우 그대로 사용
+
+                height, width = displayed_image.shape
+                bytes_per_line = 1 * width  
+
+                q_image = QImage(displayed_image.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+                pixmap = QPixmap.fromImage(q_image)
 
             # QLabel에 전체 이미지를 표시
             self.image_label.setPixmap(pixmap)
@@ -166,7 +182,7 @@ class ImageProcessor(QWidget):
         elif button_text == '에지 강조':
             self.btn_edge.clicked.disconnect(self.slider_edge_changed)
             
-########################## 색상 반전 버튼 #################
+########################## 색상 조절 버튼 #################
 
 
     def invert_image(self):
@@ -175,6 +191,25 @@ class ImageProcessor(QWidget):
         result = 255 - self.processed_image
         self.processed_image = result
         
+        self.display_image()
+        
+
+        
+    def grayscale_image(self):
+        
+        # 현재 이미지가 그레이스케일인지 확인
+        is_gray = len(self.processed_image.shape) == 2 or (len(self.processed_image.shape) == 3 and self.processed_image.shape[2] == 1)
+        print('is gray? ', is_gray)
+        
+        if is_gray:
+            # 이미지가 그레이스케일이면 RGB로 변환
+            self.processed_image = self.image
+            print('이미지가 RGB로 변환되었습니다.')
+        else:
+            # 이미지가 RGB이면 그레이스케일로 변환
+            self.processed_image = cv2.cvtColor(self.processed_image, cv2.COLOR_BGR2GRAY)
+            print('이미지가 GrayScale로 변환되었습니다.')
+
         self.display_image()
         
 ########################## 전처리 버튼 트랙바 조절 #######################################
@@ -187,6 +222,7 @@ class ImageProcessor(QWidget):
     
         # 나머지 버튼은 비활성화
         self.btn_invert.setEnabled(False)
+        self.btn_gray.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -208,6 +244,7 @@ class ImageProcessor(QWidget):
         
         # 나머지 버튼은 비활성화
         self.btn_invert.setEnabled(False)
+        self.btn_gray.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -229,6 +266,7 @@ class ImageProcessor(QWidget):
         
         # 나머지 버튼은 비활성화
         self.btn_invert.setEnabled(False)
+        self.btn_gray.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -250,6 +288,7 @@ class ImageProcessor(QWidget):
         print('모폴로지 조정을 시작합니다.')
         # 나머지 버튼은 비활성화
         self.btn_invert.setEnabled(False)
+        self.btn_gray.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_brightness.setEnabled(False)
@@ -270,6 +309,7 @@ class ImageProcessor(QWidget):
         print('이진화 조정을 시작합니다.')
         # 나머지 버튼은 비활성화
         self.btn_invert.setEnabled(False)
+        self.btn_gray.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
         self.btn_morphology.setEnabled(False)
@@ -365,11 +405,22 @@ class ImageProcessor(QWidget):
 
 
     def save_image(self):
-        # 이미지를 그레이스케일로 변환
-        gray_image = cv2.cvtColor(self.processed_image, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite("saved_image.png", gray_image)
-        QMessageBox.information(self, '알림', '이미지가 저장되었습니다.')
+        if self.processed_image is not None:
+            # 이미지가 BGR 형식이면 그레이스케일로 변환
+            if len(self.processed_image.shape) == 3 and self.processed_image.shape[2] == 3:
+                gray_image = cv2.cvtColor(self.processed_image, cv2.COLOR_BGR2GRAY)
+            else:
+                # 이미지가 이미 그레이스케일인 경우
+                gray_image = self.processed_image
 
+            # 이미지를 저장
+            cv2.imwrite("saved_image.png", gray_image)
+            QMessageBox.information(self, '알림', '이미지가 저장되었습니다.')
+        else:
+            QMessageBox.warning(self, '경고', '이미지가 없습니다. 먼저 이미지를 불러오세요.')
+            
+            
+    
     def cancel_process(self):
         self.processed_image = np.copy(self.image) # 초기화
         self.display_image()
@@ -379,6 +430,7 @@ class ImageProcessor(QWidget):
     def enable_buttons(self):
         # 버튼 활성화
         self.btn_invert.setEnabled(True)
+        self.btn_gray.setEnabled(True)
         self.btn_brightness.setEnabled(True)
         self.btn_contrast.setEnabled(True)
         self.btn_edge.setEnabled(True)
@@ -391,6 +443,7 @@ class ImageProcessor(QWidget):
     def disable_buttons(self):
         # 버튼 비활성화
         self.btn_invert.setEnabled(False)
+        self.btn_gray.setEnabled(False)
         self.btn_brightness.setEnabled(False)
         self.btn_contrast.setEnabled(False)
         self.btn_edge.setEnabled(False)
