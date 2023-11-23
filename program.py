@@ -207,7 +207,7 @@ class ImageProcessor(QWidget):
             # 이미지가 그레이스케일이면 RGB로 변환
             self.processed_image = self.image
         else:
-            # 이미지가 RGB이면 그레이스케일로 변환 ㅠ
+            # 이미지가 RGB이면 그레이스케일로 변환
             self.processed_image = cv2.cvtColor(self.processed_image, cv2.COLOR_BGR2GRAY)
 
         self.display_image()
@@ -274,7 +274,7 @@ class ImageProcessor(QWidget):
         
         self.previous_image = self.processed_image
         
-        self.slider.setValue(0) 
+        self.slider.setValue(225) 
         self.slider.setMinimum(100)
         self.slider.setMaximum(225)
         self.slider.setSingleStep(1) 
