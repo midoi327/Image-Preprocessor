@@ -15,6 +15,7 @@ class ImageProcessor(QWidget):
         self.previous_image = None
         self.current_button = None  # 현재 선택된 버튼을 저장하는 변수
         self.mode = None  # 현재 모드를 저장하는 변수
+        self.inversion_count = 0 # 색반전된 횟수를 저장하는 변수
         
         # UI 초기화
         self.init_ui()
@@ -188,8 +189,10 @@ class ImageProcessor(QWidget):
     def invert_image(self):
         print('색상을 반전합니다.')
         
-        result = 255 - self.processed_image
-        self.processed_image = result
+        self.inversion_count += 1
+        
+        inverted = 255 - self.processed_image
+        self.processed_image = inverted + self.inversion_count * self.processed_image // (self.inversion_count + 1)
         
         self.display_image()
         
@@ -199,16 +202,13 @@ class ImageProcessor(QWidget):
         
         # 현재 이미지가 그레이스케일인지 확인
         is_gray = len(self.processed_image.shape) == 2 or (len(self.processed_image.shape) == 3 and self.processed_image.shape[2] == 1)
-        print('is gray? ', is_gray)
         
         if is_gray:
             # 이미지가 그레이스케일이면 RGB로 변환
             self.processed_image = self.image
-            print('이미지가 RGB로 변환되었습니다.')
         else:
-            # 이미지가 RGB이면 그레이스케일로 변환
+            # 이미지가 RGB이면 그레이스케일로 변환 ㅠ
             self.processed_image = cv2.cvtColor(self.processed_image, cv2.COLOR_BGR2GRAY)
-            print('이미지가 GrayScale로 변환되었습니다.')
 
         self.display_image()
         
