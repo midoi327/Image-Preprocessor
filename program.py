@@ -281,7 +281,6 @@ class ImageProcessor(QWidget):
         
         self.mode = 5
         self.display_image()
-    
         
     def slider_morphology_changed(self):
         self.btn_clicked()
@@ -296,9 +295,9 @@ class ImageProcessor(QWidget):
         
         self.previous_image = self.processed_image
         
-        self.slider.setValue(5)
-        self.slider.setMinimum(2)
-        self.slider.setMaximum(10)
+        self.slider.setValue(50)
+        self.slider.setMinimum(20)
+        self.slider.setMaximum(200)
         self.slider.setSingleStep(1)
         
         self.mode = 3
@@ -367,7 +366,7 @@ class ImageProcessor(QWidget):
 
 
     def apply_morphology(self, image): 
-        factor = self.slider.value() / 10 # factor은 diameter_threshold_mm
+        factor = self.slider.value() / 100 # factor은 diameter_threshold_mm
         print('현재 모폴로지 조정중', factor)
         # 모폴로지 로직
         # 모폴로지 연산을 위한 구조 요소 생성 (원형)
