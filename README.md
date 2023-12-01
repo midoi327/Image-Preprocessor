@@ -45,9 +45,5 @@ https://user-images.githubusercontent.com/50612011/285072033-b073b572-101c-4be6-
 ## 📌 Demo
 
 
-
-![notion1](https://github.com/midoi327/Image-Preprocessor/assets/50612011/c53ba994-4d25-43f6-893f-243cd3a5b255)
-
-
-![notion2](https://github.com/midoi327/Image-Preprocessor/assets/50612011/4bc273cb-9048-46a0-9996-cf46cdf7fcd4)
+비공개
 
